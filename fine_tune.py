@@ -110,6 +110,7 @@ class MaskedLanguageModelingTrainer:
         wandb.log({"eval_loss": loss, "eval_perplexity": perplexity})
 
         trainer.save_model(f"{self.output_dir}/{self.current_time}_mlm_finetuned_model")
+        trainer.save_state()
 
 
 def main():

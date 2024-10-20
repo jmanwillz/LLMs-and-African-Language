@@ -138,6 +138,7 @@ class ClassificationTrainer:
         trainer.save_model(
             f"{self.output_dir}/{self.current_time}_classification_finetuned_{str(self.is_finetuned).lower()}"
         )
+        trainer.save_state()
 
 
 def main():
