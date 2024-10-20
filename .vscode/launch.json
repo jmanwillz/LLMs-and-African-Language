@@ -1,14 +1,26 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "LLMs and African Language",
+      "name": "LLMs and African Language (Fine-tune)",
       "type": "debugpy",
       "request": "launch",
-      "program": "llms-and-african-language.py",
+      "program": "fine_tune.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "LLMs and African Language (Classification - Base)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "classification.py",
+      "console": "integratedTerminal",
+      "args": ["--use-base"]
+    },
+    {
+      "name": "LLMs and African Language (Classification - Fine-tuned)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "classification.py",
       "console": "integratedTerminal"
     }
   ]
