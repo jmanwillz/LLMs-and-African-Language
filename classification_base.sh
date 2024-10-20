@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=bigbatch
-#SBATCH --job-name=nlp-fine-tune
+#SBATCH --job-name=nlp-classification-base
 #SBATCH --output=/home-mscluster/kkaruppen/jason/result.txt
 
 echo ------------------------------------------------------
@@ -16,4 +16,4 @@ echo ------------------------------------------------------
 
 /bin/hostname
 cd /home-mscluster/kkaruppen/jason
-python3 fine_tune.py
+python classification.py --use-base

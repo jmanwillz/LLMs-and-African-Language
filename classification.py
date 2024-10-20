@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime
 
 import evaluate
@@ -138,12 +139,25 @@ class ClassificationTrainer:
 
 
 def main():
-    use_finetuned = True
-    checkpoint_folder = "2024-10-19_13-49-04_mlm_finetuned_model"
-
     project_name = "LLMs and African Language"
     model_name = "xlm-roberta-base"
     dataset_name = "masakhane/masakhanews"
+
+    parser = argparse.ArgumentParser(description=project_name)
+    parser.add_argument(
+        "--use-base",
+        action="store_true",
+        help="Use the base model if set, otherwise use the finetuned model.",
+    )
+    args = parser.parse_args()
+
+    use_finetuned = not args.use_base
+    checkpoint_folder = "./results/2024-10-19_13-49-04_mlm_finetuned_model"
+
+    print(f"Using the fine-tuned model: {use_finetuned}")
+    if use_finetuned:
+        print(f"Model located at: {checkpoint_folder}")
+
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     run_name = f"{project_name.lower().replace(' ', '_')}_classification_finetuned_{str(use_finetuned).lower()}_{current_time}"
 
@@ -152,7 +166,7 @@ def main():
     tokenizer = XLMRobertaTokenizer.from_pretrained(model_name)
 
     classification_trainer = ClassificationTrainer(
-        model_checkpoint=f"./results/{checkpoint_folder}",
+        model_checkpoint=checkpoint_folder,
         dataset_name=dataset_name,
         tokenizer=tokenizer,
         is_finetuned=use_finetuned,
