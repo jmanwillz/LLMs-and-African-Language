@@ -1,13 +1,15 @@
-import wandb
+from datetime import datetime
+
+import evaluate
+from datasets import load_dataset
 from transformers import (
-    XLMRobertaTokenizer,
-    XLMRobertaForSequenceClassification,
     Trainer,
     TrainingArguments,
+    XLMRobertaForSequenceClassification,
+    XLMRobertaTokenizer,
 )
-from datasets import load_dataset
-import evaluate
-from datetime import datetime
+
+import wandb
 
 
 class ClassificationTrainer:
@@ -69,7 +71,8 @@ class ClassificationTrainer:
         }
 
     def train(self):
-        tokenized_dataset = self.prepare_dataset()
+        processed_dataset = self.prepare_dataset()
+
         if self.is_finetuned:
             print("Loading the fine-tuned model...")
             model_cls = XLMRobertaForSequenceClassification.from_pretrained(
@@ -100,18 +103,12 @@ class ClassificationTrainer:
         trainer = Trainer(
             model=model_cls,
             args=training_args,
-            train_dataset=tokenized_dataset["train"],
-            eval_dataset=tokenized_dataset["test"],
+            train_dataset=processed_dataset["train"],
+            eval_dataset=processed_dataset["validation"],
             compute_metrics=self.compute_metrics,
         )
 
-        print("Training model on classification task...")
-        trainer.train()
-
-        print("Evaluating classification task...")
-        eval_results = trainer.evaluate()
-        print("Evaluation results:", eval_results)
-
+        eval_results = trainer.evaluate(processed_dataset["test"])
         wandb.log(
             {
                 "accuracy": eval_results["eval_accuracy"],
@@ -121,31 +118,46 @@ class ClassificationTrainer:
             }
         )
 
+        trainer.train()
+
+        eval_results = trainer.evaluate(processed_dataset["test"])
+        wandb.log(
+            {
+                "accuracy": eval_results["eval_accuracy"],
+                "precision": eval_results["eval_precision"],
+                "recall": eval_results["eval_recall"],
+                "f1": eval_results["eval_f1"],
+            }
+        )
+
+        trainer.save_model(
+            f"{self.output_dir}/{self.current_time}_classification_finetuned_{self.is_finetuned}"
+        )
+
 
 def main():
-    checkpoint_folder = "2024-10-17_18-23-44_mlm_finetuned_model"
+    use_finetuned = True
+    checkpoint_folder = "2024-10-19_13-49-04_mlm_finetuned_model"
+
     project_name = "LLMs and African Language"
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    run_name = f"{project_name.lower().replace(' ', '_')}_classification_{current_time}"
     model_name = "xlm-roberta-base"
     dataset_name = "masakhane/masakhanews"
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run_name = f"{project_name.lower().replace(' ', '_')}_classification_finetuned_{use_finetuned}_{current_time}"
 
-    # Initialize Weights and Biases project with dynamic run name
     wandb.init(project=project_name, name=run_name)
 
     tokenizer = XLMRobertaTokenizer.from_pretrained(model_name)
 
-    # Use the fine-tuned MLM model for classification
     classification_trainer = ClassificationTrainer(
         model_checkpoint=f"./results/{checkpoint_folder}",
         dataset_name=dataset_name,
         tokenizer=tokenizer,
-        is_finetuned=False,
+        is_finetuned=use_finetuned,
         model_name=model_name,
     )
     classification_trainer.train()
 
-    # Finish the Weights and Biases session
     wandb.finish()
 
 

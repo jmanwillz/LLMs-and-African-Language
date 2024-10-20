@@ -1,5 +1,4 @@
 import math
-import warnings
 from datetime import datetime
 
 from datasets import load_dataset
@@ -12,9 +11,6 @@ from transformers import (
 )
 
 import wandb
-
-# Suppress all warnings
-warnings.filterwarnings("ignore")
 
 
 class MaskedLanguageModelingTrainer:
@@ -89,13 +85,6 @@ class MaskedLanguageModelingTrainer:
             load_best_model_at_end=True,
         )
 
-        # small_train_dataset = (
-        #     processed_dataset["train"].shuffle(seed=42).select(range(1000))
-        # )
-        # small_validation_dataset = (
-        #     processed_dataset["validation"].shuffle(seed=42).select(range(1000))
-        # )
-
         trainer = Trainer(
             model=model,
             args=training_args,
@@ -104,20 +93,18 @@ class MaskedLanguageModelingTrainer:
             data_collator=data_collator,
         )
 
-        eval_results = trainer.evaluate()
+        eval_results = trainer.evaluate(processed_dataset["test"])
         loss = eval_results["eval_loss"]
         perplexity = self.compute_perplexity(loss)
 
-        # Log intial metrics to Weights and Biases
         wandb.log({"eval_loss": loss, "eval_perplexity": perplexity})
 
         trainer.train()
 
-        eval_results = trainer.evaluate()
+        eval_results = trainer.evaluate(processed_dataset["test"])
         loss = eval_results["eval_loss"]
         perplexity = self.compute_perplexity(loss)
 
-        # Log fine tuned metrics to Weights and Biases
         wandb.log({"eval_loss": loss, "eval_perplexity": perplexity})
 
         trainer.save_model(f"{self.output_dir}/{self.current_time}_mlm_finetuned_model")
@@ -125,10 +112,10 @@ class MaskedLanguageModelingTrainer:
 
 def main():
     project_name = "LLMs and African Language"
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    run_name = f"{project_name.lower().replace(' ', '_')}_masked_language_modelling_{current_time}"
     model_name = "xlm-roberta-base"
     dataset_name = "uestc-swahili/swahili"
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run_name = f"{project_name.lower().replace(' ', '_')}_masked_language_modelling_{current_time}"
 
     wandb.init(project=project_name, name=run_name)
 
