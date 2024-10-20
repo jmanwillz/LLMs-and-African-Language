@@ -120,7 +120,8 @@ def main():
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     run_name = f"{project_name.lower().replace(' ', '_')}_masked_language_modelling_{current_time}"
 
-    wandb.init(project=project_name, name=run_name)
+    run = wandb.init(project=project_name, name=run_name)
+    run.alert(title="Run Started", text=f"The run {run_name} has started.")
 
     tokenizer = XLMRobertaTokenizer.from_pretrained(model_name)
 
@@ -133,7 +134,7 @@ def main():
     )
     mlm_trainer.train()
 
-    wandb.finish()
+    run.finish()
 
 
 if __name__ == "__main__":
