@@ -20,6 +20,7 @@ class MaskedLanguageModelingTrainer:
         dataset_name,
         tokenizer,
         current_time,
+        run_name,
         block_size=128,
         output_dir="./results",
         log_dir="./logs",
@@ -31,6 +32,7 @@ class MaskedLanguageModelingTrainer:
         self.log_dir = log_dir
         self.block_size = block_size
         self.current_time = current_time
+        self.run_name = run_name
 
     def tokenize_function(self, examples):
         return self.tokenizer(examples["text"])
@@ -70,16 +72,16 @@ class MaskedLanguageModelingTrainer:
         )
 
         training_args = TrainingArguments(
+            run_name=self.run_name,
             output_dir=self.output_dir,
             eval_strategy="steps",
+            eval_steps=50,
             save_strategy="steps",
+            save_steps=100,
+            save_total_limit=4,
             logging_strategy="steps",
             logging_steps=10,
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
-            num_train_epochs=3,
-            eval_steps=50,
-            save_steps=100,
+            num_train_epochs=5,
             logging_dir=self.log_dir,
             report_to="wandb",
             load_best_model_at_end=True,
@@ -126,6 +128,7 @@ def main():
         dataset_name=dataset_name,
         tokenizer=tokenizer,
         current_time=current_time,
+        run_name=run_name,
     )
     mlm_trainer.train()
 

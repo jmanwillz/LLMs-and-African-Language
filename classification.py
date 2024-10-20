@@ -22,6 +22,7 @@ class ClassificationTrainer:
         is_finetuned,
         model_name,
         current_time,
+        run_name,
         output_dir="./results",
         log_dir="./logs",
     ):
@@ -33,6 +34,7 @@ class ClassificationTrainer:
         self.log_dir = log_dir
         self.model_name = model_name
         self.current_time = current_time
+        self.run_name = run_name
 
         self.accuracy_metric = evaluate.load("accuracy")
         self.precision_metric = evaluate.load("precision")
@@ -88,16 +90,16 @@ class ClassificationTrainer:
             )
 
         training_args = TrainingArguments(
+            run_name=self.run_name,
             output_dir=self.output_dir,
             eval_strategy="steps",
+            eval_steps=50,
             save_strategy="steps",
+            save_steps=100,
+            save_total_limit=4,
             logging_strategy="steps",
             logging_steps=10,
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
-            num_train_epochs=3,
-            eval_steps=50,
-            save_steps=100,
+            num_train_epochs=5,
             logging_dir=self.log_dir,
             report_to="wandb",
             load_best_model_at_end=True,
@@ -139,6 +141,8 @@ class ClassificationTrainer:
 
 
 def main():
+    checkpoint_folder = "./results/2024-10-19_13-49-04_mlm_finetuned_model"
+
     project_name = "LLMs and African Language"
     model_name = "xlm-roberta-base"
     dataset_name = "masakhane/masakhanews"
@@ -150,9 +154,7 @@ def main():
         help="Use the base model if set, otherwise use the finetuned model.",
     )
     args = parser.parse_args()
-
     use_finetuned = not args.use_base
-    checkpoint_folder = "./results/2024-10-19_13-49-04_mlm_finetuned_model"
 
     print(f"Using the fine-tuned model: {use_finetuned}")
     if use_finetuned:
@@ -172,6 +174,7 @@ def main():
         is_finetuned=use_finetuned,
         model_name=model_name,
         current_time=current_time,
+        run_name=run_name,
     )
     classification_trainer.train()
 
