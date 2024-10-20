@@ -20,6 +20,7 @@ class ClassificationTrainer:
         tokenizer,
         is_finetuned,
         model_name,
+        current_time,
         output_dir="./results",
         log_dir="./logs",
     ):
@@ -30,6 +31,7 @@ class ClassificationTrainer:
         self.output_dir = output_dir
         self.log_dir = log_dir
         self.model_name = model_name
+        self.current_time = current_time
 
         self.accuracy_metric = evaluate.load("accuracy")
         self.precision_metric = evaluate.load("precision")
@@ -131,7 +133,7 @@ class ClassificationTrainer:
         )
 
         trainer.save_model(
-            f"{self.output_dir}/{self.current_time}_classification_finetuned_{self.is_finetuned}"
+            f"{self.output_dir}/{self.current_time}_classification_finetuned_{str(self.is_finetuned).lower()}"
         )
 
 
@@ -143,7 +145,7 @@ def main():
     model_name = "xlm-roberta-base"
     dataset_name = "masakhane/masakhanews"
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    run_name = f"{project_name.lower().replace(' ', '_')}_classification_finetuned_{use_finetuned}_{current_time}"
+    run_name = f"{project_name.lower().replace(' ', '_')}_classification_finetuned_{str(use_finetuned).lower()}_{current_time}"
 
     wandb.init(project=project_name, name=run_name)
 
@@ -155,6 +157,7 @@ def main():
         tokenizer=tokenizer,
         is_finetuned=use_finetuned,
         model_name=model_name,
+        current_time=current_time,
     )
     classification_trainer.train()
 
