@@ -1,6 +1,7 @@
 __pycache__/
+neurips/
 output/
-wandb/
 results/
+wandb/
 
 *.mov
