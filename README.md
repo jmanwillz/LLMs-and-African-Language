@@ -29,7 +29,7 @@ Step 2: Activate the conda environment.
 conda activate development
 ```
 
-Step 3: Login to Weights & Biases.
+Step 3: Login to [Weights & Biases](https://wandb.ai/site/).
 
 ```bash
 wandb login --relogin
