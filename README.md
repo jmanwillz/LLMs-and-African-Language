@@ -13,7 +13,7 @@ Please find the specification [here](./resources/Project.pdf).
 
 ## Report
 
-Please find the report on [Overleaf](https://www.overleaf.com/read/jqsybjtxbpws#2f7ed1).
+Please find the report [here](./report/LLMs_and_African_Language.pdf).
 
 ## Running the Code
 
